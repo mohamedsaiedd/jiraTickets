@@ -1,4 +1,4 @@
-name: Build and Deploy Node.js app to GitHub Pages
+name: Deploy to GitHub Pages (Static Site)
 
 on:
   push:
@@ -17,26 +17,20 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Build with Jekyll (or Hugo, etc.)
+        uses: actions/jekyll-build-pages@v1 # Or appropriate build action
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm ci
-      - name: Run Build
-        run: npm run build
+          source: ./
+          destination: ./_site # Adjust if your output is different
       - name: Upload artifact
-        uses: actions/upload-artifact@v3 # Use upload-artifact
+        uses: actions/upload-pages-artifact@v2 # Correct action for pages
         with:
-          name: build
-          path: build # Or dist, or whatever your build output directory is
+          path: ./_site # Match the destination from the build step
 
   deploy:
     environment:
@@ -47,6 +41,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          build_dir: build # Or dist, match the path from the upload step
+        uses: actions/deploy-pages@v2 # Correct action for pages
